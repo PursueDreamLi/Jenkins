@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Springboot+Vue</title>
+
+    <!-- js文件不能放在static中？ -->
+    <script src="jQuery/jquery-3.4.1.min.js"></script>
+    <script src="vue/vue.min.js"></script>    
+    <script src="vue/vue-resource.min.js"></script>
+    <script src="element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="css/style.css"/>
+    <link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css"/>
+    <script  type="text/javascript" src="js/html.js" defer></script>
+</head>
+<body >
+<div id="app" onload="query">
+  <el-container>
+  <el-header>用户界面 
+  <!-- 
+  	<el-button size="mini" icon="el-icon-refresh" v-on:click="query"></el-button>
+  -->
+  </el-header>    
+    <el-container>
+      <!-- 
+      <el-aside width="150px">
+        <el-menu :default-openeds="'1'"><el-submenu index="1">
+          <template slot="title">
+            <i class="el-icon-message"></i>操作
+          </template>
+          <el-menu-item-group>
+          	<el-menu-item index="1-1" v-on:click="query">刷新</el-menu-item>
+            <el-menu-item index="1-2" v-on:click="add">增加</el-menu-item>
+            <el-menu-item index="1-3" v-on:click="select">查找</el-menu-item>
+            <el-menu-item index="1-4">更新</el-menu-item>
+            <el-menu-item index="1-5">删除</el-menu-item>
+          </el-menu-item-group>
+        </el-submenu></el-menu>
+      </el-aside>
+       
+      	<el-header>
+      		<el-row >
+      			<el-button>刷新</el-button>
+      			<el-button>增加</el-button>
+      			<el-button>查找</el-button>
+      		</el-row>
+      	</el-header>
+      	-->
+        <el-main>
+        <el-row text-align="left">
+      			<el-button icon="el-icon-refresh" v-on:click="refresh" type="primary">刷新</el-button>
+      			<el-button icon="el-icon-plus" v-on:click="add" type="success">增加</el-button>
+      			<el-button icon="el-icon-search" v-on:click="select" type="info">查找</el-button>
+      	</el-row>
+        <el-table :data="arr">
+          <el-table-column prop="id" label="编号" width=""></el-table-column>
+          <el-table-column prop="userName" label="姓名" width=""></el-table-column>
+          <el-table-column prop="userAge" label="年龄" width=""></el-table-column>
+          <el-table-column prop="createTime" label="时间" width=""></el-table-column>
+          <el-table-column label="操作" width="">
+          	<template slot-scope="scope">
+		        <el-button type="warning" size="mini" icon="el-icon-edit" v-on:click="editWindow(scope.$index,scope.row)">编辑</el-button>
+		        <el-button type="danger" size="mini" icon="el-icon-delete" v-on:click="delConfirm(scope.$index,scope.row,arr)">删除</el-button>
+		    </template>
+          </el-table-column>
+        </el-table>
+        <!--  
+        	@size-change="handleSizeChange" 
+        	@current-change="handleCurrentChange" 
+        	-->
+        <el-pagination  
+        	background    
+            @size-change="handleSizeChange" 
+        	@current-change="handleCurrentChange"    	
+        	:current-page="currentPage" 
+        	:page-sizes="[5,10,15,20]"
+        	:page-size="pageSize" 
+        	layout="total, sizes, prev, pager, next, jumper" 
+        	:total="arrTotal.length"> 
+        </el-pagination>
+        <el-dialog title="编辑" :visible.sync="editFormVisiable"  :close-on-click-modal="true" :append-to-body="true">
+        	<el-form :model="editForm" label-width="80px" ref="editForm">
+        		<el-form-item label="编号" prop="id">
+        			<el-input v-model="editForm.id" :disabled="true" auto-complete="off"></el-input>
+        		</el-form-item>
+        		<el-form-item label="姓名" prop="userName">
+        			<el-input v-model="editForm.userName" auto-complete="off"></el-input>
+        		</el-form-item>
+        		<el-form-item label="年龄" prop="userAge">
+        			<el-input v-model="editForm.userAge" auto-complete="off"></el-input>
+        		</el-form-item>
+        		<el-form-item label="时间" prop="createTime">
+        			<el-input v-model="editForm.createTime" auto-complete="off"></el-input>
+        		</el-form-item>
+        	</el-form>
+        	<div slot="footer" class="dialog-footer">
+        		<el-button @click.native="editFormVisiable=false">取消</el-button>
+        		<el-button type="primary" @click.native="editSubmit(editForm)" >提交</el-button>
+        	</div>
+        </el-dialog>
+        <el-dialog title="增加" :visible.sync="addFormVisiable"  :close-on-click-modal="true" :append-to-body="true">
+        	<el-form :model="addForm" label-width="80px" ref="addForm">
+        		<el-form-item label="编号" prop="id">
+        			<el-input v-model="addForm.id" auto-complete="off"></el-input>
+        		</el-form-item>
+        		<el-form-item label="姓名" prop="userName">
+        			<el-input v-model="addForm.userName" auto-complete="off"></el-input>
+        		</el-form-item>
+        		<el-form-item label="年龄" prop="userAge">
+        			<el-input v-model="addForm.userAge" auto-complete="off"></el-input>
+        		</el-form-item>
+        		<el-form-item label="时间" prop="createTime">
+        			<el-input v-model="addForm.createTime" auto-complete="off"></el-input>
+        		</el-form-item>
+        	</el-form>
+        	<div slot="footer" class="dialog-footer">
+        		<el-button @click.native="addFormVisiable=false">取消</el-button>
+        		<el-button type="primary" @click.native="addSubmit(addForm)" >提交</el-button>
+        	</div>
+        </el-dialog>
+        <el-dialog title="编号查找" :visible.sync="selectFormVisiable"  :close-on-click-modal="true" :append-to-body="true">
+        	<el-form :model="id" label-width="80px" ref="id">
+        		<el-form-item label="输入编号" prop="id">
+        			<el-input v-model="id" auto-complete="off"></el-input>
+        		</el-form-item>
+        	</el-form>
+        	<div slot="footer" class="dialog-footer">
+        		<el-button @click.native="selectFormVisiable=false">取消</el-button>
+        		<el-button type="primary" @click.native="selectSubmit(id)" >提交</el-button>
+        	</div>
+        </el-dialog>
+      </el-main>
+    </el-container>
+  </el-container>
+</div>
+</body>
+</html>

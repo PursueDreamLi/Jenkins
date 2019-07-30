@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+  
+<!-- 指定工作空间，要与接口名相同，源代码没有去看，猜测应该是通过"这里的namespace.下边方法的id"来定位方法的 -->  
+<mapper namespace="byr.dao.UserMapper">  
+
+	<!-- select all user -->
+	<select id="selectAll" resultType="byr.pojo.User">
+		select * from user
+	</select>
+	<!-- select by id -->
+	<select id="selectById" parameterType="int" resultType="byr.pojo.User">
+		select id,userName,userAge,createTime from user where id=#{id}
+	</select>
+	<!-- add user -->
+	<insert id="addUser" parameterType="byr.pojo.User">
+		insert into user values(#{id},#{userName},#{userAge},#{createTime})
+	</insert>
+	<!-- update user -->
+	<update id="updateUser" parameterType="byr.pojo.User">
+		update user set userName=#{userName},userAge=#{userAge},createTime=#{createTime} where id=#{id}
+	</update>
+	<!-- delete user -->
+	<delete id="deleteUserById" parameterType="int">
+		delete from user where id=#{id}
+	</delete>
+	
+	<select id="selectByPage" parameterType="int" resultType="byr.pojo.User">
+		select * from user limit #{beginIndex}, #{endIndex}
+	</select>
+	
+</mapper>
